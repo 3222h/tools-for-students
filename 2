@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to PDF Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            margin: 0;
+        }
+
+        h2 {
+            color: #2c2c54;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #imageInput {
+            margin: 20px 0;
+            padding: 14px 20px;
+            border: 2px dashed #4b7bec;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            font-size: 16px;
+            color: #40407a;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 5px 20px rgba(75, 123, 236, 0.2);
+        }
+
+        #imageInput:hover {
+            border-color: #26de81;
+            background-color: rgba(255, 255, 255, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(75, 123, 236, 0.3);
+        }
+
+        #imagePreview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            backdrop-filter: blur(4px);
+        }
+
+        .preview-img {
+            width: 180px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+        }
+
+        .preview-img:hover {
+            transform: scale(1.07) rotate(1deg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-color: #26de81;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 14px 30px;
+            background: linear-gradient(45deg, #4b7bec, #778beb);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(75, 123, 236, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #778beb, #4b7bec);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(75, 123, 236, 0.6);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 15px rgba(75, 123, 236, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 26px;
+            }
+            #imageInput {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+            #imagePreview {
+                padding: 15px;
+            }
+            .preview-img {
+                width: 140px;
+            }
+            button {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Convert Images to PDF</h2>
+    <input type="file" id="imageInput" multiple accept="image/*">
+    <div id="imagePreview"></div>
+    <button onclick="convertToPDF()">Convert to PDF</button>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+
+        document.getElementById('imageInput').addEventListener('change', function(event) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            Array.from(event.target.files).forEach(file => {
+                const img = document.createElement('img');
+                img.classList.add('preview-img');
+                img.src = URL.createObjectURL(file);
+                preview.appendChild(img);
+            });
+        });
+
+        function convertToPDF() {
+            const pdf = new jsPDF();
+            const images = document.querySelectorAll('.preview-img');
+            let yOffset = 10;
+            images.forEach((img, index) => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                context.drawImage(img, 0, 0);
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const imgWidth = 190;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                if (index > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', 10, yOffset, imgWidth, imgHeight);
+            });
+            pdf.save('converted.pdf');
+        }
+    </script>
+</body>
+</html>

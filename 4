@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            margin: 0;
+        }
+
+        /* Container */
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            color: #1e272e;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* File Upload */
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 15px 0;
+            border: 2px dashed #54a0ff;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-size: 16px;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: #00d2d3;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 5px 20px rgba(84, 160, 255, 0.3);
+        }
+
+        /* Input Fields */
+        .resize-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            color: #1e272e;
+            font-weight: 500;
+            font-size: 15px;
+            margin: 10px 0 5px;
+        }
+
+        input[type="number"], select {
+            width: 90%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #54a0ff;
+            box-shadow: 0 0 8px rgba(84, 160, 255, 0.3);
+        }
+
+        select {
+            cursor: pointer;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%231e272e" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+            background-size: 12px;
+            appearance: none;
+        }
+
+        /* Resize Button */
+        button {
+            background: linear-gradient(45deg, #54a0ff, #74c0fc);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(84, 160, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #74c0fc, #54a0ff);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(84, 160, 255, 0.6);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 15px rgba(84, 160, 255, 0.3);
+        }
+
+        /* Canvas */
+        canvas {
+            margin-top: 25px;
+            max-width: 100%;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: #f8f9fa;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        canvas:hover {
+            transform: scale(1.02);
+        }
+
+        /* Download Button */
+        #downloadButton {
+            display: none;
+            margin-top: 20px;
+            padding: 14px 20px;
+            background: linear-gradient(45deg, #00d2d3, #48e6e6);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(0, 210, 211, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        #downloadButton:hover {
+            background: linear-gradient(45deg, #48e6e6, #00d2d3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 210, 211, 0.6);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            h2 {
+                font-size: 26px;
+            }
+            button, #downloadButton {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+            input[type="number"], select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔍 Image Resizer</h2>
+        
+        <input type="file" id="imageInput" accept="image/*">
+        
+        <div class="resize-options">
+            <label for="width">Width:</label>
+            <input type="number" id="width" placeholder="Enter width">
+
+            <label for="height">Height:</label>
+            <input type="number" id="height" placeholder="Enter height">
+            
+            <label for="unit">Select Unit:</label>
+            <select id="unit">
+                <option value="px">Pixels (px)</option>
+                <option value="cm">Centimeters (cm)</option>
+                <option value="in">Inches (in)</option>
+            </select>
+        </div>
+
+        <button id="resizeButton">Resize Image</button>
+        <canvas id="canvas"></canvas>
+
+        <a id="downloadButton" download="resized-image.png">⬇ Download Image</a>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById("imageInput");
+        const resizeButton = document.getElementById("resizeButton");
+        const widthInput = document.getElementById("width");
+        const heightInput = document.getElementById("height");
+        const unitSelect = document.getElementById("unit");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const downloadButton = document.getElementById("downloadButton");
+
+        let image = new Image();
+
+        imageInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    image.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        resizeButton.addEventListener("click", () => {
+            if (!image.src) {
+                alert("Please upload an image first!");
+                return;
+            }
+
+            let width = parseFloat(widthInput.value);
+            let height = parseFloat(heightInput.value);
+            let unit = unitSelect.value;
+
+            if (!width || !height) {
+                alert("Enter valid width and height!");
+                return;
+            }
+
+            const dpi = 96;
+            if (unit === "cm") {
+                width = (width / 2.54) * dpi;
+                height = (height / 2.54) * dpi;
+            } else if (unit === "in") {
+                width = width * dpi;
+                height = height * dpi;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(image, 0, 0, width, height);
+
+            downloadButton.href = canvas.toDataURL("image/png");
+            downloadButton.style.display = "block";
+        });
+    </script>
+</body>
+</html>

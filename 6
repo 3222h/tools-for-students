@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple YouTube Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
+            text-align: center;
+        }
+        .downloader-section h2 {
+            font-size: 2em;
+            color: #1f1f1f;
+        }
+        .input-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .input-container input {
+            width: 70%;
+            height: 56px;
+            padding: 15px;
+            font-size: 1em;
+            border: 3px solid #f44336;
+            border-right: none;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+        .input-container button {
+            height: 56px;
+            padding: 15px;
+            font-size: 1em;
+            font-weight: bold;
+            background-color: #f44336;
+            color: #fff;
+            border: 3px solid #f44336;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        .input-container button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <section class="downloader-section">
+        <h2>YouTube Video Downloader</h2>
+        <div class="input-container">
+            <input id="videoLinkInput" type="text" placeholder="Paste video link here">
+            <button onclick="convertVideo()">Download</button>
+        </div>
+    </section>
+
+    <script>
+        function convertVideo() {
+            var videoLink = document.getElementById('videoLinkInput').value.trim();
+            if (videoLink === '') { return; }
+            var adUrl = 'https://wounofoarausooy.net/4/5711609';
+            var downloadUrl = 'https://p.oceansaver.in/api/card2/?url=' + encodeURIComponent(videoLink) + '&adUrl=' + encodeURIComponent(adUrl);
+            window.open(downloadUrl, '_blank'); // Open the URL directly in a new tab
+        }
+    </script>
+</body>
+</html>

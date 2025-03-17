@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Tools</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        .menu { margin-bottom: 20px; }
+        .tool { display: none; }
+        img { max-width: 100%; margin-top: 10px; }
+        input { width: 80px; text-align: center; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <h1>Image Tools</h1>
+    <div class="menu">
+        <button onclick="showTool('compressor')">Image Compressor</button>
+        <button onclick="showTool('pdfConverter')">Image to PDF Converter</button>
+        <button onclick="showTool('formatConverter')">Image Format Converter</button>
+        <button onclick="showTool('resizerConverter')">Image Resizer & Converter</button>
+    </div>
+
+    <div id="compressor" class="tool">
+        <h2>Image Compressor</h2>
+        <input type="file" id="upload" accept="image/*"><br><br>
+        <label for="quality">Quality (1-10):</label>
+        <input type="number" id="quality" min="1" max="10" step="1" value="5"><br><br>
+        <button id="compress">Compress Image</button>
+        <br><br>
+        <canvas id="canvas"></canvas>
+        <br>
+        <img id="output" alt="Compressed Image">
+        <br>
+        <a id="download" style="display:none;" download="compressed.jpg">Download</a>
+    </div>
+
+    <div id="pdfConverter" class="tool">
+        <h2>Image to PDF Converter</h2>
+        <input type="file" id="uploadImages" accept="image/*" multiple><br><br>
+        <button id="convertToPdf">Convert to PDF</button>
+    </div>
+
+    <div id="formatConverter" class="tool">
+        <h2>Image Format Converter</h2>
+        <input type="file" id="uploadImage" accept="image/*"><br><br>
+        <label for="format">Convert to:</label>
+        <select id="format">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WebP</option>
+            <option value="image/gif">GIF</option>
+        </select>
+        <br><br>
+        <button id="convertImage">Convert Image</button>
+        <br><br>
+        <canvas id="canvas"></canvas>
+        <br>
+        <img id="outputImage" alt="Converted Image">
+        <br>
+        <a id="downloadImage" style="display:none;" download="converted_image">Download Converted Image</a>
+    </div>
+
+    <div id="resizerConverter" class="tool">
+        <h2>Image Resizer & Converter</h2>
+        <input type="file" id="uploadResizeImage" accept="image/*"><br><br>
+        <label for="width">Width (px):</label>
+        <input type="number" id="width" min="1" placeholder="Auto"><br><br>
+        <label for="height">Height (px):</label>
+        <input type="number" id="height" min="1" placeholder="Auto"><br><br>
+        <label for="resizeFormat">Convert to:</label>
+        <select id="resizeFormat">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WebP</option>
+            <option value="image/gif">GIF</option>
+        </select>
+        <br><br>
+        <button id="resizeImage">Resize & Convert</button>
+        <br><br>
+        <canvas id="resizeCanvas"></canvas>
+        <br>
+        <img id="resizedOutputImage" alt="Resized Image">
+        <br>
+        <a id="downloadResizedImage" style="display:none;" download="resized_image">Download Resized Image</a>
+    </div>
+
+    <script>
+        function showTool(toolId) {
+            document.querySelectorAll('.tool').forEach(tool => tool.style.display = 'none');
+            document.getElementById(toolId).style.display = 'block';
+        }
+
+        document.getElementById("resizeImage").addEventListener("click", function() {
+            let uploadedImage = null;
+            const file = document.getElementById("uploadResizeImage").files[0];
+            if (!file) {
+                alert("Please upload an image first.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = new Image();
+                uploadedImage.onload = function() {
+                    const width = parseInt(document.getElementById("width").value) || uploadedImage.width;
+                    const height = parseInt(document.getElementById("height").value) || uploadedImage.height;
+                    const format = document.getElementById("resizeFormat").value;
+                    const canvas = document.getElementById("resizeCanvas");
+                    const ctx = canvas.getContext("2d");
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(uploadedImage, 0, 0, width, height);
+                    const resizedImage = canvas.toDataURL(format);
+
+                    document.getElementById("resizedOutputImage").src = resizedImage;
+                    const downloadLink = document.getElementById("downloadResizedImage");
+                    downloadLink.href = resizedImage;
+                    downloadLink.download = "resized_image" + format.replace("image/", ".");
+                    downloadLink.style.display = "block";
+                };
+                uploadedImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>

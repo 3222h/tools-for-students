@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Images Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            margin: 0;
+            text-align: center;
+        }
+
+        h2 {
+            color: #3c2f5f;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            padding: 14px 20px;
+            border: 2px dashed #786fa6;
+            border-radius: 12px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            color: #3c2f5f;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 5px 20px rgba(120, 111, 166, 0.2);
+        }
+
+        input:hover {
+            border-color: #f8a5c2;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 8px 25px rgba(120, 111, 166, 0.3);
+            transform: translateY(-3px);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f8a5c2;
+        }
+
+        #preview {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .image-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .image-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        img:hover {
+            transform: scale(1.03);
+        }
+
+        button {
+            display: inline-block;
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #786fa6, #a18cd1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            box-shadow: 0 5px 20px rgba(120, 111, 166, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #a18cd1, #786fa6);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(120, 111, 166, 0.6);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 15px rgba(120, 111, 166, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 26px;
+            }
+            input {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+            .image-container {
+                padding: 15px;
+                max-width: 300px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Convert PDF to Images</h2>
+    <input type="file" id="pdfFile" accept="application/pdf">
+    <div id="preview"></div>
+
+    <script>
+        // Explicitly set the workerSrc for pdf.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        document.getElementById('pdfFile').addEventListener('change', function(event) {
+            let file = event.target.files[0];
+            if (!file || file.type !== 'application/pdf') {
+                alert('Please select a valid PDF file.');
+                return;
+            }
+
+            let fileReader = new FileReader();
+            fileReader.onload = function() {
+                let pdfData = new Uint8Array(this.result);
+                processPDF(pdfData);
+            };
+            fileReader.readAsArrayBuffer(file);
+        });
+
+        async function processPDF(pdfData) {
+            let previewContainer = document.getElementById('preview');
+            previewContainer.innerHTML = ''; // Clear previous previews
+
+            try {
+                // Load the PDF document
+                const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+
+                // Process each page
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 1.5 }); // Increase scale for better quality
+
+                    // Create a canvas for rendering
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    // Render the page
+                    await page.render({ canvasContext: context, viewport }).promise;
+
+                    // Convert to image data
+                    const imageData = canvas.toDataURL('image/png');
+                    createImageElement(imageData, pageNum);
+                }
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                alert('An error occurred while processing the PDF.');
+            }
+        }
+
+        function createImageElement(imageData, pageNum) {
+            let imgContainer = document.createElement('div');
+            imgContainer.classList.add('image-container');
+
+            let img = document.createElement('img');
+            img.src = imageData;
+
+            let downloadBtn = document.createElement('button');
+            downloadBtn.textContent = `Download Page ${pageNum}`;
+            downloadBtn.onclick = function() {
+                let link = document.createElement('a');
+                link.href = imageData;
+                link.download = `page-${pageNum}.png`;
+                link.click();
+            };
+
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(downloadBtn);
+            document.getElementById('preview').appendChild(imgContainer);
+        }
+    </script>
+</body>
+</html>

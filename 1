@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor & Downloader</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            max-width: 450px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        select {
+            background: #fff;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #2980b9, #2471a3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        img:hover {
+            transform: scale(1.02);
+        }
+
+        #downloadLink {
+            display: none;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        #downloadLink:hover {
+            background: linear-gradient(45deg, #27ae60, #219653);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5);
+        }
+
+        label {
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 500;
+            display: block;
+            text-align: left;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Image Compressor</h2>
+        <input type="file" id="upload" accept="image/*">
+        
+        <label for="quality">Select Quality (1-10)</label>
+        <select id="quality">
+            <option value="1">1 - Lowest</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10" selected>10 - Best</option>
+        </select>
+        
+        <button id="compress">Compress Image</button>
+        
+        <img id="preview" />
+        
+        <a id="downloadLink">Download Compressed Image</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
+    <script>
+        document.getElementById('compress').addEventListener('click', function() {
+            const fileInput = document.getElementById('upload');
+            const qualitySelect = document.getElementById('quality');
+
+            if (!fileInput.files.length) return alert("Please upload an image!");
+
+            const file = fileInput.files[0];
+            const qualityValue = parseInt(qualitySelect.value) / 10;
+
+            new Compressor(file, {
+                quality: qualityValue,
+                success(result) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(result);
+                    reader.onloadend = function () {
+                        const base64data = reader.result;
+
+                        document.getElementById('preview').src = base64data;
+
+                        const downloadLink = document.getElementById('downloadLink');
+                        downloadLink.href = base64data;
+                        downloadLink.download = 'compressed-image.jpg';
+                        downloadLink.style.display = 'block';
+
+                        downloadLink.click();
+                    };
+                },
+                error(err) {
+                    console.error(err.message);
+                },
+            });
+        });
+    </script>
+</body>
+</html>

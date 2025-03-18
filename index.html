@@ -13,13 +13,23 @@
             font-family: 'Arial', sans-serif;
         }
 
-        /* Body styling with a gradient background */
+        /* Body Styling */
         body {
             text-align: center;
             background: linear-gradient(135deg, #f4f4f4 0%, #e0e0e0 100%);
             min-height: 100vh;
             padding: 60px 20px;
             line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Page container with max-width for laptops */
+        .container {
+            max-width: 900px; /* Prevents stretching on large screens */
+            width: 100%;
+            padding: 20px;
         }
 
         /* Navigation bar styling */
@@ -29,13 +39,15 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            max-width: 900px; /* Ensures navbar doesn't stretch too wide */
         }
 
-        /* Logo or brand name */
+        /* Logo Text */
         .logo {
             color: #fff;
             font-size: 22px;
@@ -43,7 +55,7 @@
             transition: all 0.3s ease-in-out;
         }
 
-        /* Menu styles */
+        /* Menu Styles */
         .menu {
             list-style-type: none;
             display: flex;
@@ -89,8 +101,41 @@
             transition: all 0.3s ease-in-out;
         }
 
-        /* Responsive menu */
+        /* Heading Styling */
+        h1 {
+            color: #2c2c2c;
+            margin-top: 40px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Description Text */
+        p {
+            font-size: 18px;
+            color: #333;
+            max-width: 800px;
+            margin: auto;
+            line-height: 1.8;
+            padding: 15px;
+        }
+
+        /* Contact Info */
+        .contact {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        /* Responsive Menu for Mobile */
         @media (max-width: 768px) {
+            nav {
+                max-width: 100%;
+            }
+
             .menu {
                 display: none;
                 flex-direction: column;
@@ -117,7 +162,7 @@
             }
         }
 
-        /* Animation for hamburger menu */
+        /* Animation for Hamburger Menu */
         .hamburger.active div:nth-child(1) {
             transform: rotate(45deg) translate(5px, 5px);
         }
@@ -130,18 +175,7 @@
             transform: rotate(-45deg) translate(5px, -5px);
         }
 
-        /* Heading styling */
-        h1 {
-            color: #2c2c2c;
-            margin-top: 40px;
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        /* Fade-in animation for h1 */
+        /* Fade-in Animation */
         @keyframes fadeIn {
             0% { opacity: 0; transform: translateY(20px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -160,27 +194,21 @@
             <div></div>
         </div>
         <ul class="menu">
-            <li><a href="page1.html">Page 1</a></li>
-            <li><a href="page2.html">Page 2</a></li>
-            <li><a href="page3.html">Page 3</a></li>
-            <li><a href="page4.html">Page 4</a></li>
-            <li><a href="page5.html">Page 5</a></li>
-            <li><a href="page6.html">Page 6</a></li>
+            <li><a href="page1.html">Image Compressor</a></li>
+            <li><a href="page2.html">Images to PDF</a></li>
+            <li><a href="page3.html">Image Format Converter</a></li>
+            <li><a href="page4.html">Image Resizer</a></li>
+            <li><a href="page5.html">PDF to Images</a></li>
+            <li><a href="page6.html">PDF Compress</a></li>
         </ul>
     </nav>
 </header>
 
-<h1>TOOLS FOR STUDENTS</h1>
-<br>
-<br>
-<br>
-<br>
-<br>
-<p>These tools are used to compress the image, make pdf, changing Image Format, Image Resizer, Convert PDF to Images, Pdf compress.etc</p>
-<br>
-<br>
-<br>
-<P>Contact Mail: ashu940631@gmail.com</P>
+<div class="container">
+    <h1>TOOLS FOR STUDENTS</h1>
+    <p>These tools are used to compress images, make PDFs, change image formats, resize images, convert PDFs to images, compress PDFs, etca.</p>
+    <p class="contact">📧 Contact Mail: ashu940631@gmail.com</p>
+</div>
 
 <script>
     function toggleMenu() {

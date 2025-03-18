@@ -145,9 +145,11 @@
         .image-item {
             position: relative;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             width: 150px;
             height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .image-item img {
@@ -156,15 +158,38 @@
             border-radius: 8px;
             border: 3px solid transparent;
             object-fit: cover;
+            transition: all 0.3s ease;
         }
 
         .image-item:hover img {
             border-color: #2196F3;
         }
 
+        .image-item.selected {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+
         .image-item.selected img {
-            border-color: #4CAF50;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            border: 5px solid #4CAF50;
+            opacity: 0.9;
+        }
+
+        .image-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         #downloadLink {
@@ -255,13 +280,11 @@
                         viewport: viewport
                     }).promise;
 
-                    // Create preview canvas for passport size (150x150px for display)
                     const previewCanvas = document.createElement("canvas");
                     const previewContext = previewCanvas.getContext("2d");
                     previewCanvas.width = 150;
                     previewCanvas.height = 150;
                     
-                    // Calculate scaling to fit image into passport size
                     const scale = Math.min(150 / viewport.width, 150 / viewport.height);
                     const scaledWidth = viewport.width * scale;
                     const scaledHeight = viewport.height * scale;
@@ -291,7 +314,7 @@
                     
                     const imgElement = document.createElement("img");
                     imgElement.src = imgURL;
-                    imgElement.dataset.index = i - 1; // Store index for reference
+                    imgElement.dataset.index = i - 1;
                     
                     imgWrapper.appendChild(imgElement);
                     imgWrapper.addEventListener('click', function() {
@@ -338,7 +361,7 @@
                 const blob = new Blob([pdfBytes], { type: "application/pdf" });
                 const link = document.getElementById("downloadLink");
                 link.href = URL.createObjectURL(blob);
-                link.style.display = "block"; // Show download link only after PDF is created
+                link.style.display = "block";
             } catch (error) {
                 console.error('Error generating PDF:', error);
                 alert('Error generating PDF. Please try again.');

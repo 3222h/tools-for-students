@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Compressor</title>
+    <title>PDF Image Compressor</title>
     <script src="https://unpkg.com/pdf-lib"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-toBlob.js/1.0.0/canvas-toBlob.min.js"></script>
     <style>
-        /* General Styling */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(to right, #ff7e5f, #feb47b);
@@ -21,36 +21,25 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            flex-direction: column;
         }
-
-        /* Card Container */
         .container {
             background: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
             width: 90%;
-            max-width: 400px;
-            animation: fadeIn 0.8s ease-in-out;
+            max-width: 500px;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         h2 {
             margin-bottom: 15px;
             color: #333;
             font-weight: 600;
         }
-
-        /* Input File Styling */
         input[type="file"] {
             display: none;
         }
-
         .custom-file-upload {
             display: inline-block;
             padding: 12px 20px;
@@ -62,30 +51,23 @@
             font-weight: bold;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
-
         .custom-file-upload:hover {
             background: #e76b52;
             transform: scale(1.05);
         }
-
-        /* Quality Slider */
         .quality-section {
             margin: 15px 0;
             text-align: center;
         }
-
         .quality-slider {
             width: 100%;
             margin-top: 10px;
         }
-
         .quality-value {
             font-size: 18px;
             font-weight: bold;
             color: #007bff;
         }
-
-        /* Button Styling */
         .btn {
             background: #007bff;
             color: white;
@@ -99,13 +81,33 @@
             font-weight: bold;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
-
         .btn:hover {
             background: #0056b3;
             transform: scale(1.05);
         }
-
-        /* Download Link */
+        #imageSelection {
+            display: none;
+            margin-top: 15px;
+        }
+        #imageContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .image-item {
+            margin: 5px;
+            position: relative;
+        }
+        .image-item img {
+            max-width: 100px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .selected {
+            border-color: #28a745 !important;
+        }
         #downloadLink {
             display: none;
             margin-top: 15px;
@@ -115,41 +117,38 @@
             text-decoration: none;
             transition: 0.3s ease;
         }
-
-        #downloadLink:hover {
-            text-decoration: underline;
-            color: #1e7e34;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Compress PDF in Browser</h2>
-        
-        <!-- Custom File Input -->
+        <h2>Compress PDF</h2>
         <label for="pdfInput" class="custom-file-upload">📄 Choose PDF File</label>
         <input type="file" id="pdfInput" accept="application/pdf">
         
-        <!-- Quality Selection -->
         <div class="quality-section">
             <label for="quality">Quality: <span id="qualityValue">5</span></label>
             <input type="range" id="quality" class="quality-slider" min="1" max="10" value="5" step="1" oninput="updateQuality()">
         </div>
 
-        <!-- Compress Button -->
-        <button class="btn" onclick="compressPDF()">⚡ Compress PDF</button>
-        
-        <!-- Download Link -->
-        <br>
+        <button class="btn" onclick="extractAndCompressImages()">📷 Extract & Compress Images</button>
+
+        <div id="imageSelection">
+            <h3>Select Images for New PDF</h3>
+            <div id="imageContainer"></div>
+            <button class="btn" onclick="generatePDF()">📄 Generate PDF</button>
+        </div>
+
         <a id="downloadLink" download="compressed.pdf">⬇️ Download Compressed PDF</a>
     </div>
 
     <script>
+        let extractedImages = [];
+
         function updateQuality() {
             document.getElementById("qualityValue").innerText = document.getElementById("quality").value;
         }
 
-        async function compressPDF() {
+        async function extractAndCompressImages() {
             const input = document.getElementById('pdfInput');
             if (!input.files.length) {
                 alert('Please select a PDF file.');
@@ -157,39 +156,71 @@
             }
 
             const quality = document.getElementById("quality").value;
-            const compressionFactor = (11 - quality) * 0.1;  // Adjust compression dynamically
+            const compressionFactor = quality / 10;
 
             const file = input.files[0];
             const reader = new FileReader();
-            
+
             reader.onload = async function () {
                 const existingPdfBytes = new Uint8Array(reader.result);
                 const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-
-                // Reduce PDF quality based on slider
-                pdfDoc.setCreator('PDF Compressor');
-                
-                // Iterate through pages and modify content (basic compression simulation)
                 const pages = pdfDoc.getPages();
-                pages.forEach(page => {
-                    const { width, height } = page.getSize();
-                    page.setSize(width * compressionFactor, height * compressionFactor);
-                });
+                
+                extractedImages = [];
+                document.getElementById("imageContainer").innerHTML = "";
 
-                // Serialize PDF to bytes
-                const compressedPdfBytes = await pdfDoc.save({ 
-                    useObjectStreams: false, // Keeps it compatible with older viewers
-                    updateFieldAppearances: false
-                });
+                for (let i = 0; i < pages.length; i++) {
+                    const { width, height } = pages[i].getSize();
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
 
-                // Create a blob and download link
-                const blob = new Blob([compressedPdfBytes], { type: 'application/pdf' });
-                const link = document.getElementById('downloadLink');
-                link.href = URL.createObjectURL(blob);
-                link.style.display = 'block';
+                    canvas.width = width * compressionFactor;
+                    canvas.height = height * compressionFactor;
+
+                    context.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+
+                    canvas.toBlob(async (blob) => {
+                        const imgURL = URL.createObjectURL(blob);
+                        extractedImages.push(blob);
+                        
+                        const imgElement = document.createElement("img");
+                        imgElement.src = imgURL;
+                        imgElement.classList.add("image-item");
+                        imgElement.onclick = function () {
+                            imgElement.classList.toggle("selected");
+                        };
+                        
+                        document.getElementById("imageContainer").appendChild(imgElement);
+                    }, "image/jpeg", compressionFactor);
+                }
+
+                document.getElementById("imageSelection").style.display = "block";
             };
 
             reader.readAsArrayBuffer(file);
+        }
+
+        async function generatePDF() {
+            const pdfDoc = await PDFLib.PDFDocument.create();
+            const selectedImages = document.querySelectorAll(".image-item.selected");
+
+            if (selectedImages.length === 0) {
+                alert("Please select at least one image.");
+                return;
+            }
+
+            for (let img of selectedImages) {
+                const imgBytes = await fetch(img.src).then(res => res.arrayBuffer());
+                const pdfImage = await pdfDoc.embedJpg(imgBytes);
+                const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+                page.drawImage(pdfImage, { x: 0, y: 0, width: pdfImage.width, height: pdfImage.height });
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: "application/pdf" });
+            const link = document.getElementById("downloadLink");
+            link.href = URL.createObjectURL(blob);
+            link.style.display = "block";
         }
     </script>
 </body>

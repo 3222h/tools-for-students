@@ -3,129 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Tools</title>
+    <title>Homepage</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        .menu { margin-bottom: 20px; }
-        .tool { display: none; }
-        img { max-width: 100%; margin-top: 10px; }
-        input { width: 80px; text-align: center; }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body>
-    <h1>Image Tools</h1>
-    <div class="menu">
-        <button onclick="showTool('compressor')">Image Compressor</button>
-        <button onclick="showTool('pdfConverter')">Image to PDF Converter</button>
-        <button onclick="showTool('formatConverter')">Image Format Converter</button>
-        <button onclick="showTool('resizerConverter')">Image Resizer & Converter</button>
-    </div>
-
-    <div id="compressor" class="tool">
-        <h2>Image Compressor</h2>
-        <input type="file" id="upload" accept="image/*"><br><br>
-        <label for="quality">Quality (1-10):</label>
-        <input type="number" id="quality" min="1" max="10" step="1" value="5"><br><br>
-        <button id="compress">Compress Image</button>
-        <br><br>
-        <canvas id="canvas"></canvas>
-        <br>
-        <img id="output" alt="Compressed Image">
-        <br>
-        <a id="download" style="display:none;" download="compressed.jpg">Download</a>
-    </div>
-
-    <div id="pdfConverter" class="tool">
-        <h2>Image to PDF Converter</h2>
-        <input type="file" id="uploadImages" accept="image/*" multiple><br><br>
-        <button id="convertToPdf">Convert to PDF</button>
-    </div>
-
-    <div id="formatConverter" class="tool">
-        <h2>Image Format Converter</h2>
-        <input type="file" id="uploadImage" accept="image/*"><br><br>
-        <label for="format">Convert to:</label>
-        <select id="format">
-            <option value="image/jpeg">JPG</option>
-            <option value="image/jpeg">JPEG</option>
-            <option value="image/png">PNG</option>
-            <option value="image/webp">WebP</option>
-            <option value="image/gif">GIF</option>
-        </select>
-        <br><br>
-        <button id="convertImage">Convert Image</button>
-        <br><br>
-        <canvas id="canvas"></canvas>
-        <br>
-        <img id="outputImage" alt="Converted Image">
-        <br>
-        <a id="downloadImage" style="display:none;" download="converted_image">Download Converted Image</a>
-    </div>
-
-    <div id="resizerConverter" class="tool">
-        <h2>Image Resizer & Converter</h2>
-        <input type="file" id="uploadResizeImage" accept="image/*"><br><br>
-        <label for="width">Width (px):</label>
-        <input type="number" id="width" min="1" placeholder="Auto"><br><br>
-        <label for="height">Height (px):</label>
-        <input type="number" id="height" min="1" placeholder="Auto"><br><br>
-        <label for="resizeFormat">Convert to:</label>
-        <select id="resizeFormat">
-            <option value="image/jpeg">JPG</option>
-            <option value="image/jpeg">JPEG</option>
-            <option value="image/png">PNG</option>
-            <option value="image/webp">WebP</option>
-            <option value="image/gif">GIF</option>
-        </select>
-        <br><br>
-        <button id="resizeImage">Resize & Convert</button>
-        <br><br>
-        <canvas id="resizeCanvas"></canvas>
-        <br>
-        <img id="resizedOutputImage" alt="Resized Image">
-        <br>
-        <a id="downloadResizedImage" style="display:none;" download="resized_image">Download Resized Image</a>
-    </div>
-
-    <script>
-        function showTool(toolId) {
-            document.querySelectorAll('.tool').forEach(tool => tool.style.display = 'none');
-            document.getElementById(toolId).style.display = 'block';
+        /* Reset default margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
 
-        document.getElementById("resizeImage").addEventListener("click", function() {
-            let uploadedImage = null;
-            const file = document.getElementById("uploadResizeImage").files[0];
-            if (!file) {
-                alert("Please upload an image first.");
-                return;
+        /* Body styling with a gradient background */
+        body {
+            text-align: center;
+            background: linear-gradient(135deg, #f4f4f4 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            padding: 60px 20px;
+            line-height: 1.6;
+        }
+
+        /* Navigation bar styling */
+        nav {
+            background-color: #1a1a1a;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Logo or brand name */
+        .logo {
+            color: #fff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* Menu styles */
+        .menu {
+            list-style-type: none;
+            display: flex;
+        }
+
+        .menu li {
+            margin: 10px 15px;
+        }
+
+        .menu li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 10px 15px;
+            transition: all 0.3s ease-in-out;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #ff6600, #ff8c00);
+            background-size: 0% 100%;
+            background-repeat: no-repeat;
+        }
+
+        /* Hover effect */
+        .menu li a:hover {
+            background-size: 100% 100%;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Hamburger menu button */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger div {
+            width: 30px;
+            height: 4px;
+            background-color: white;
+            margin: 5px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Responsive menu */
+        @media (max-width: 768px) {
+            .menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: #1a1a1a;
+                padding: 10px 0;
+                text-align: center;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedImage = new Image();
-                uploadedImage.onload = function() {
-                    const width = parseInt(document.getElementById("width").value) || uploadedImage.width;
-                    const height = parseInt(document.getElementById("height").value) || uploadedImage.height;
-                    const format = document.getElementById("resizeFormat").value;
-                    const canvas = document.getElementById("resizeCanvas");
-                    const ctx = canvas.getContext("2d");
 
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(uploadedImage, 0, 0, width, height);
-                    const resizedImage = canvas.toDataURL(format);
+            .menu li {
+                margin: 10px 0;
+            }
 
-                    document.getElementById("resizedOutputImage").src = resizedImage;
-                    const downloadLink = document.getElementById("downloadResizedImage");
-                    downloadLink.href = resizedImage;
-                    downloadLink.download = "resized_image" + format.replace("image/", ".");
-                    downloadLink.style.display = "block";
-                };
-                uploadedImage.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    </script>
+            .menu.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+        }
+
+        /* Animation for hamburger menu */
+        .hamburger.active div:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active div:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* Heading styling */
+        h1 {
+            color: #2c2c2c;
+            margin-top: 40px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Fade-in animation for h1 */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">My Website</div>
+        <div class="hamburger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="menu">
+            <li><a href="page1.html">Page 1</a></li>
+            <li><a href="page2.html">Page 2</a></li>
+            <li><a href="page3.html">Page 3</a></li>
+            <li><a href="page4.html">Page 4</a></li>
+            <li><a href="page5.html">Page 5</a></li>
+            <li><a href="page6.html">Page 6</a></li>
+            <li><a href="page7.html">Page 7</a></li>
+        </ul>
+    </nav>
+</header>
+
+<h1>Welcome to My Website</h1>
+
+<script>
+    function toggleMenu() {
+        const menu = document.querySelector('.menu');
+        const hamburger = document.querySelector('.hamburger');
+        menu.classList.toggle('active');
+        hamburger.classList.toggle('active');
+    }
+</script>
+
 </body>
 </html>

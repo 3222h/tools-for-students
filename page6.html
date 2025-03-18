@@ -4,138 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Image Compressor</title>
-    <script src="https://unpkg.com/pdf-lib"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-toBlob.js/1.0.0/canvas-toBlob.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
-        .container {
-            background: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
         }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 700px;
+            transition: all 0.3s ease;
+        }
+
         h2 {
-            margin-bottom: 15px;
             color: #333;
-            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 700;
         }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+
+        .custom-file-upload:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
         input[type="file"] {
             display: none;
         }
-        .custom-file-upload {
-            display: inline-block;
-            padding: 12px 20px;
-            background: #ff7e5f;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s ease;
-            font-weight: bold;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        }
-        .custom-file-upload:hover {
-            background: #e76b52;
-            transform: scale(1.05);
-        }
+
         .quality-section {
-            margin: 15px 0;
-            text-align: center;
+            margin: 25px 0;
+            background: rgba(245, 245, 245, 0.8);
+            padding: 15px;
+            border-radius: 10px;
         }
+
+        .quality-section label {
+            color: #555;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
         .quality-slider {
             width: 100%;
-            margin-top: 10px;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            cursor: pointer;
         }
+
+        .quality-slider:hover {
+            opacity: 1;
+        }
+
         .quality-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #007bff;
+            color: #4CAF50;
+            font-weight: 600;
         }
+
         .btn {
-            background: #007bff;
+            background: #2196F3;
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 12px 25px;
             font-size: 16px;
             border-radius: 8px;
             cursor: pointer;
-            transition: 0.3s ease;
-            margin-top: 15px;
-            font-weight: bold;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 15px 0;
+            font-weight: 600;
         }
+
         .btn:hover {
-            background: #0056b3;
-            transform: scale(1.05);
+            background: #1e87db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
         }
+
         #imageSelection {
             display: none;
-            margin-top: 15px;
+            margin-top: 25px;
         }
+
+        #imageSelection h3 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
         #imageContainer {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(245, 245, 245, 0.8);
+            border-radius: 10px;
         }
+
         .image-item {
-            margin: 5px;
             position: relative;
-        }
-        .image-item img {
-            max-width: 100px;
-            border: 2px solid #007bff;
-            border-radius: 5px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            width: 150px;
+            height: 150px;
         }
-        .selected {
-            border-color: #28a745 !important;
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            border: 3px solid transparent;
+            object-fit: cover;
         }
+
+        .image-item:hover img {
+            border-color: #2196F3;
+        }
+
+        .image-item.selected img {
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
         #downloadLink {
             display: none;
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 16px;
-            color: #28a745;
-            font-weight: bold;
+            color: #4CAF50;
             text-decoration: none;
-            transition: 0.3s ease;
+            text-align: center;
+            padding: 12px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        #downloadLink:hover {
+            background: rgba(76, 175, 80, 0.2);
+            color: #45a049;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Compress PDF</h2>
-        <label for="pdfInput" class="custom-file-upload">📄 Choose PDF File</label>
+        <h2>PDF Image Compressor</h2>
+        <label for="pdfInput" class="custom-file-upload">📄 Upload PDF</label>
         <input type="file" id="pdfInput" accept="application/pdf">
         
         <div class="quality-section">
-            <label for="quality">Quality: <span id="qualityValue">5</span></label>
+            <label for="quality">Compression Quality: <span id="qualityValue">5</span></label>
             <input type="range" id="quality" class="quality-slider" min="1" max="10" value="5" step="1" oninput="updateQuality()">
         </div>
 
-        <button class="btn" onclick="extractAndCompressImages()">📷 Extract & Compress Images</button>
+        <button class="btn" onclick="extractAndCompressImages()">📷 Extract & Compress</button>
 
         <div id="imageSelection">
             <h3>Select Images for New PDF</h3>
             <div id="imageContainer"></div>
-            <button class="btn" onclick="generatePDF()">📄 Generate PDF</button>
+            <button class="btn" onclick="generatePDF()">📄 Create PDF</button>
         </div>
 
         <a id="downloadLink" download="compressed.pdf">⬇️ Download Compressed PDF</a>
@@ -143,6 +210,7 @@
 
     <script>
         let extractedImages = [];
+        let compressedImageBlobs = [];
 
         function updateQuality() {
             document.getElementById("qualityValue").innerText = document.getElementById("quality").value;
@@ -156,71 +224,125 @@
             }
 
             const quality = document.getElementById("quality").value;
-            const compressionFactor = quality / 10;
+            const compressionQuality = quality / 10;
 
             const file = input.files[0];
-            const reader = new FileReader();
+            const arrayBuffer = await file.arrayBuffer();
+            
+            try {
+                if (!pdfjsLib) {
+                    throw new Error('pdf.js library not loaded');
+                }
 
-            reader.onload = async function () {
-                const existingPdfBytes = new Uint8Array(reader.result);
-                const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-                const pages = pdfDoc.getPages();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const numPages = pdf.numPages;
                 
                 extractedImages = [];
+                compressedImageBlobs = [];
                 document.getElementById("imageContainer").innerHTML = "";
 
-                for (let i = 0; i < pages.length; i++) {
-                    const { width, height } = pages[i].getSize();
+                for (let i = 1; i <= numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    
                     const canvas = document.createElement("canvas");
                     const context = canvas.getContext("2d");
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
 
-                    canvas.width = width * compressionFactor;
-                    canvas.height = height * compressionFactor;
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
 
-                    context.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+                    // Create preview canvas for passport size (150x150px for display)
+                    const previewCanvas = document.createElement("canvas");
+                    const previewContext = previewCanvas.getContext("2d");
+                    previewCanvas.width = 150;
+                    previewCanvas.height = 150;
+                    
+                    // Calculate scaling to fit image into passport size
+                    const scale = Math.min(150 / viewport.width, 150 / viewport.height);
+                    const scaledWidth = viewport.width * scale;
+                    const scaledHeight = viewport.height * scale;
+                    const offsetX = (150 - scaledWidth) / 2;
+                    const offsetY = (150 - scaledHeight) / 2;
+                    
+                    previewContext.drawImage(canvas, 0, 0, viewport.width, viewport.height, 
+                        offsetX, offsetY, scaledWidth, scaledHeight);
 
-                    canvas.toBlob(async (blob) => {
-                        const imgURL = URL.createObjectURL(blob);
-                        extractedImages.push(blob);
-                        
-                        const imgElement = document.createElement("img");
-                        imgElement.src = imgURL;
-                        imgElement.classList.add("image-item");
-                        imgElement.onclick = function () {
-                            imgElement.classList.toggle("selected");
-                        };
-                        
-                        document.getElementById("imageContainer").appendChild(imgElement);
-                    }, "image/jpeg", compressionFactor);
+                    const compressedBlob = await new Promise((resolve, reject) => {
+                        canvas.toBlob(
+                            blob => blob ? resolve(blob) : reject(new Error('Failed to create blob')),
+                            'image/jpeg',
+                            compressionQuality
+                        );
+                    });
+
+                    const previewBlob = await new Promise((resolve) => {
+                        previewCanvas.toBlob(resolve, 'image/jpeg', compressionQuality);
+                    });
+
+                    const imgURL = URL.createObjectURL(previewBlob);
+                    compressedImageBlobs.push(compressedBlob);
+
+                    const imgWrapper = document.createElement("div");
+                    imgWrapper.classList.add("image-item");
+                    
+                    const imgElement = document.createElement("img");
+                    imgElement.src = imgURL;
+                    imgElement.dataset.index = i - 1; // Store index for reference
+                    
+                    imgWrapper.appendChild(imgElement);
+                    imgWrapper.addEventListener('click', function() {
+                        imgWrapper.classList.toggle("selected");
+                    });
+                    
+                    document.getElementById("imageContainer").appendChild(imgWrapper);
                 }
 
                 document.getElementById("imageSelection").style.display = "block";
-            };
-
-            reader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                alert(`Error processing PDF: ${error.message}. Please try another file.`);
+            }
         }
 
         async function generatePDF() {
-            const pdfDoc = await PDFLib.PDFDocument.create();
             const selectedImages = document.querySelectorAll(".image-item.selected");
-
             if (selectedImages.length === 0) {
                 alert("Please select at least one image.");
                 return;
             }
 
-            for (let img of selectedImages) {
-                const imgBytes = await fetch(img.src).then(res => res.arrayBuffer());
-                const pdfImage = await pdfDoc.embedJpg(imgBytes);
-                const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
-                page.drawImage(pdfImage, { x: 0, y: 0, width: pdfImage.width, height: pdfImage.height });
-            }
+            try {
+                const pdfDoc = await PDFLib.PDFDocument.create();
 
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: "application/pdf" });
-            const link = document.getElementById("downloadLink");
-            link.href = URL.createObjectURL(blob);
-            link.style.display = "block";
+                for (let imgWrapper of selectedImages) {
+                    const imgElement = imgWrapper.querySelector("img");
+                    const imgIndex = parseInt(imgElement.dataset.index);
+                    const imgBlob = compressedImageBlobs[imgIndex];
+                    const imgBytes = await imgBlob.arrayBuffer();
+                    const pdfImage = await pdfDoc.embedJpg(imgBytes);
+                    
+                    const page = pdfDoc.addPage([pdfImage.width, pdfImage.height]);
+                    page.drawImage(pdfImage, {
+                        x: 0,
+                        y: 0,
+                        width: pdfImage.width,
+                        height: pdfImage.height
+                    });
+                }
+
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: "application/pdf" });
+                const link = document.getElementById("downloadLink");
+                link.href = URL.createObjectURL(blob);
+                link.style.display = "block"; // Show download link only after PDF is created
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            }
         }
     </script>
 </body>

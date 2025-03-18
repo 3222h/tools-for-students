@@ -40,6 +40,7 @@
             color: #fff;
             font-size: 22px;
             font-weight: bold;
+            transition: all 0.3s ease-in-out;
         }
 
         /* Menu styles */
@@ -152,7 +153,7 @@
 
 <header>
     <nav>
-        <div class="logo">Click Menu To Use Tools →</div>
+        <div class="logo" id="menu-text">Click Menu To Use Tools →</div>
         <div class="hamburger" onclick="toggleMenu()">
             <div></div>
             <div></div>
@@ -165,19 +166,37 @@
             <li><a href="page4.html">Page 4</a></li>
             <li><a href="page5.html">Page 5</a></li>
             <li><a href="page6.html">Page 6</a></li>
-            <li><a href="page7.html">Page 7</a></li>
         </ul>
     </nav>
 </header>
 
-<h1>Welcome to My Website</h1>
+<h1>TOOLS FOR STUDENTS</h1>
+<br>
+<br>
+<br>
+<br>
+<br>
+<p>These tools are used to compress the image, make pdf, changing Image Format, Image Resizer, Convert PDF to Images, Pdf compress.</p>
+<br>
+<br>
+<br>
+<P>Contact Mail: ashu940631@gmail.com</P>
 
 <script>
     function toggleMenu() {
         const menu = document.querySelector('.menu');
         const hamburger = document.querySelector('.hamburger');
+        const menuText = document.getElementById('menu-text');
+
         menu.classList.toggle('active');
         hamburger.classList.toggle('active');
+
+        // Change text when menu is opened or closed
+        if (menu.classList.contains('active')) {
+            menuText.innerHTML = "Click To Close The Menu →";
+        } else {
+            menuText.innerHTML = "Click Menu To Use Tools →";
+        }
     }
 </script>
 
